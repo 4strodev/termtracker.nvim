@@ -21,6 +21,22 @@ function core:removeTerminalBufferNumber(bufnr)
     end
 end
 
+function core:openTerminal(opts)
+    opts = opts or {}
+
+    if opts.orientation == 'vertical' then
+        -- Open horizontal split
+        vim.cmd('vsplit')
+    else
+        -- Open horizontal split
+        vim.cmd('split')
+    end
+
+    -- Get the current buffer and start a terminal in it
+    vim.cmd('terminal')
+    vim.cmd({ cmd = 'resize', args = { opts.size or '15' } })
+end
+
 function core:getTerminals()
     return self.terminals
 end

@@ -33,25 +33,24 @@ function termtracker:listen_terminal_events()
 end
 
 function termtracker:create_commands()
-    vim.api.nvim_create_user_command("ListTerminals", function()
+    vim.api.nvim_create_user_command("TermList", function()
         local terminals = core:getTerminals()
 
         if vim.tbl_isempty(terminals) then
-            print("No terminal buffers tracked.")
+            vim.notify("No terminal buffers tracked.", vim.log.levels.WARN)
             return
         end
 
-        if termtracker.opts.use_telescope then
-            picker.list_terminals(terminals)
-            return
+        local ok, _ = pcall(require, "telescope")
+        if not ok then
+            vim.notify("Cannot use telescope. Check if it's installed correctly", vim.log.levels.ERROR)
         end
 
+        picker.list_terminals(terminals)
+    end, {})
 
-        print("== Tracked terminal buffers ==")
-        for bufnr, info in pairs(terminals) do
-            local status = info.opened_at
-            print(string.format("  #%d - %s (%s)", bufnr, info.name, status))
-        end
+    vim.api.nvim_create_user_command("TermOpen", function()
+        core:openTerminal({ orientation = 'horizontal', size = self.opts.size })
     end, {})
 end
 
