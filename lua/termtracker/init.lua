@@ -5,11 +5,7 @@ local termtracker = {}
 ---Setup termtracker
 ---@param opts table
 function termtracker.setup(opts)
-    opts = opts or {}
-
-    termtracker.opts = opts
-
-    core:setup()
+    core:setup(opts)
 
     termtracker:listen_terminal_events()
     termtracker:create_commands()
@@ -50,7 +46,19 @@ function termtracker:create_commands()
     end, {})
 
     vim.api.nvim_create_user_command("TermOpen", function()
-        core:openTerminal({ orientation = 'horizontal', size = self.opts.size })
+        core:openTerminal({ orientation = 'horizontal' })
+    end, {})
+
+    vim.api.nvim_create_user_command("TermToggle", function()
+        local latestTerminal = core:getLatestTerminal()
+
+        local terminalToOpen = nil
+        if latestTerminal ~= nil then
+            terminalToOpen = latestTerminal.bufnr
+        else
+            vim.notify("Creating new terminal")
+        end
+        core:openTerminal({ orientation = 'horizontal' }, terminalToOpen)
     end, {})
 end
 

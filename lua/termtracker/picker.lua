@@ -5,6 +5,7 @@ local finders = require("telescope.finders")
 local conf = require("telescope.config").values
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
+local core = require("termtracker.core")
 
 picker.list_terminals = function(terminals, opts)
     opts = opts or {}
@@ -12,7 +13,7 @@ picker.list_terminals = function(terminals, opts)
     local entries = {}
 
     for bufnr, info in pairs(terminals) do
-        local status = info.opened_at
+        local status = os.date("%Y-%m-%d %H:%M:%S", info.opened_at)
         table.insert(entries, {
             bufnr = bufnr,
             display = string.format("#%d - %s (%s)", bufnr, info.name, status),
@@ -40,12 +41,7 @@ picker.list_terminals = function(terminals, opts)
                 local selection = action_state.get_selected_entry()
                 local bufnr = selection.value.bufnr
 
-                if vim.api.nvim_buf_is_loaded(bufnr) then
-                    vim.cmd('vsplit')
-                    vim.api.nvim_set_current_buf(bufnr)
-                else
-                    vim.notify("Buffer not loaded.", vim.log.levels.ERROR)
-                end
+                core:openTerminal({ orientation = 'vertical' }, bufnr)
             end)
             actions.select_horizontal:replace(function()
                 actions.close(prompt_bufnr)
@@ -53,12 +49,7 @@ picker.list_terminals = function(terminals, opts)
                 local selection = action_state.get_selected_entry()
                 local bufnr = selection.value.bufnr
 
-                if vim.api.nvim_buf_is_loaded(bufnr) then
-                    vim.cmd('split')
-                    vim.api.nvim_set_current_buf(bufnr)
-                else
-                    vim.notify("Buffer not loaded.", vim.log.levels.ERROR)
-                end
+                core:openTerminal({ orientation = 'horizontal' }, bufnr)
             end)
 
             actions.select_default:replace(function()
@@ -67,11 +58,8 @@ picker.list_terminals = function(terminals, opts)
                 local selection = action_state.get_selected_entry()
                 local bufnr = selection.value.bufnr
 
-                if vim.api.nvim_buf_is_loaded(bufnr) then
-                    vim.api.nvim_set_current_buf(bufnr)
-                else
-                    vim.notify("Buffer not loaded.", vim.log.levels.ERROR)
-                end
+
+                core:openTerminal({ orientation = 'horizontal' }, bufnr)
             end)
 
             return true
